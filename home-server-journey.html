@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building a Home Server: One Guy's Journey</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222638;
+    --border: #2e3350;
+    --accent: #5b7fff;
+    --accent2: #ff7eb3;
+    --accent3: #7fffb0;
+    --text: #e8eaf6;
+    --muted: #8890b5;
+    --warning: #ffcc5b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 10vw;
+    background: radial-gradient(ellipse at 80% 20%, #1a2060 0%, transparent 60%),
+                radial-gradient(ellipse at 10% 80%, #1a0a30 0%, transparent 50%),
+                var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--border) 39px, var(--border) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--border) 39px, var(--border) 40px);
+    opacity: 0.15;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(42px, 7vw, 90px);
+    line-height: 1.05;
+    position: relative;
+    max-width: 800px;
+    margin-bottom: 32px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 560px;
+    position: relative;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    background: var(--surface);
+  }
+
+  /* LAYOUT */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* CHAPTER */
+  .chapter {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chapter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .chapter h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.15;
+    margin-bottom: 28px;
+  }
+
+  .chapter p {
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-weight: 300;
+    max-width: 680px;
+    font-size: 17px;
+  }
+
+  .chapter p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* CALLOUT BOXES */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 28px 0;
+    font-size: 15px;
+  }
+
+  .callout.warning {
+    border-left-color: var(--warning);
+  }
+
+  .callout.tip {
+    border-left-color: var(--accent3);
+  }
+
+  .callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .callout.warning .callout-label { color: var(--warning); }
+  .callout.tip .callout-label { color: var(--accent3); }
+
+  .callout p {
+    color: var(--text) !important;
+    margin: 0 !important;
+    font-size: 15px !important;
+  }
+
+  /* CARDS GRID */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 32px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+  }
+
+  .card-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* PARITY DIAGRAM */
+  .parity-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 28px 0;
+  }
+
+  .parity-demo h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .drives {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .drive {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .drive-box {
+    width: 64px;
+    height: 80px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--bg);
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .drive-box.parity {
+    border-color: var(--warning);
+    color: var(--warning);
+  }
+
+  .drive-box.data {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .drive-box.new {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    border-style: dashed;
+  }
+
+  .drive-size {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* PRICING TABLE */
+  .pricing {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 28px 0;
+  }
+
+  .pricing-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pricing-row:last-child { border-bottom: none; }
+
+  .pricing-row.header {
+    background: var(--surface2);
+  }
+
+  .pricing-cell {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-right: 1px solid var(--border);
+  }
+
+  .pricing-cell:last-child { border-right: none; }
+
+  .pricing-row.header .pricing-cell {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .pricing-cell .price {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    color: var(--accent);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .pricing-cell .note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* STACK FLOW */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 28px 0;
+  }
+
+  .stack-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    border: 1px solid var(--border);
+    margin-top: -1px;
+  }
+
+  .stack-row:first-child { border-radius: 8px 8px 0 0; }
+  .stack-row:last-child { border-radius: 0 0 8px 8px; }
+
+  .stack-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border);
+  }
+
+  .stack-content {
+    padding: 14px 20px;
+    font-size: 14px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .stack-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text);
+    background: var(--surface);
+  }
+
+  .stack-pill.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* WHAT TO ACTUALLY BACK UP */
+  .backup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .backup-card {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .backup-card.yes {
+    border-color: var(--accent3);
+    background: rgba(127, 255, 176, 0.04);
+  }
+
+  .backup-card.no {
+    border-color: var(--muted);
+    background: var(--surface);
+    opacity: 0.7;
+  }
+
+  .backup-card h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--accent3);
+  }
+
+  .backup-card.no h4 { color: var(--muted); }
+
+  .backup-card ul {
+    list-style: none;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .backup-card ul li {
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .backup-card ul li::before {
+    content: '→';
+    color: var(--accent3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .backup-card.no ul li::before { color: var(--muted); }
+
+  /* APPS SECTION */
+  .apps-category {
+    margin-bottom: 32px;
+  }
+
+  .apps-category h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .app-chip {
+    font-size: 13px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+  }
+
+  .app-chip.highlight {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+    margin: 28px 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+
+  .timeline-item h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .timeline-item p {
+    font-size: 15px !important;
+    color: var(--muted) !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+  }
+
+  /* FOOTER */
+  .footer {
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  .footer p {
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .hero { padding: 60px 24px; }
+    .container { padding: 0 24px; }
+    .pricing-row { grid-template-columns: 1fr; }
+    .backup-grid { grid-template-columns: 1fr; }
+    .stack-row { grid-template-columns: 1fr; }
+    .stack-label { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">A personal journey in home server building</div>
+  <h1>How I Went From Four Drives to a Full <em>Home Lab</em></h1>
+  <p class="hero-sub">This is what I did, what I wish I'd known, and how you might think about doing it yourself.</p>
+  <div class="hero-tags">
+    <span class="tag">Unraid OS</span>
+    <span class="tag">Plex Media Server</span>
+    <span class="tag">Docker</span>
+    <span class="tag">Home Assistant</span>
+    <span class="tag">Pi-hole</span>
+    <span class="tag">Self-hosted</span>
+  </div>
+</section>
+
+<!-- CHAPTER 1 -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 01</div>
+    <h2>Where it Started</h2>
+    <p>The whole thing started with a piece of software, not a hardware plan. I came across <strong>Unraid</strong> — an OS that provides RAID-style data protection but with a key twist: it works with any drives you have, regardless of size or brand. You don't need a matched set. You don't need to buy anything specific. You can literally use whatever is lying around.</p>
+    <p>That was it. That was the spark.</p>
+
+    <div class="callout tip">
+      <div class="callout-label">Why Unraid changed everything</div>
+      <p>Traditional RAID requires all drives to be identical — same size, same manufacturer, ideally same batch. If you want to expand, you're often rebuilding from scratch. Unraid throws all that out. Mix a 4TB, a 6TB, and an 8TB drive — no problem. Add another drive next year when you need more space — just add it. That flexibility is what makes it perfect for a home setup where you're growing organically, not provisioning a data center.</p>
+    </div>
+
+    <p>At the same time, I was building myself a new PC. That meant I had a perfectly functional motherboard, CPU, and RAM suddenly sitting idle. Combined with drives I'd pulled from an old Synology NAS and a few more rescued from work equipment headed for recycling, I had almost everything I needed already.</p>
+
+    <p>The actual out-of-pocket cost to get started was close to zero. <strong>Unraid made that possible</strong> — because the whole premise is that you use what you have. The software is what unlocks the value in hardware you'd otherwise throw away.</p>
+
+    <div class="callout">
+      <div class="callout-label">The lesson</div>
+      <p>Don't start by pricing out hardware. Start by understanding what Unraid can do with what you already own. You might be closer to a working server than you think.</p>
+    </div>
+
+    <p>There was one GPU decision worth mentioning: if you ever plan to transcode video for people outside your home, a dedicated Nvidia card can handle that work in hardware instead of burning CPU cycles. I added one early on. Whether you need it depends on how you plan to use Plex — more on that later.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 2: UNRAID EXPLAINED -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 02</div>
+    <h2>How Unraid Actually Works</h2>
+    <p>The core idea in Unraid is simple: one drive is your <strong>parity drive</strong>, and all the others are data drives. If any single data drive fails, the parity drive can reconstruct what was on it. No data lost.</p>
+
+    <div class="parity-demo">
+      <h4>Example array — different sized drives, still protected</h4>
+      <div class="drives">
+        <div class="drive">
+          <div class="drive-box parity">⚡<span>Parity</span></div>
+          <span class="drive-size">12 TB</span>
+        </div>
+        <div class="drive">
+          <div class="drive-box data">💾<span>Data</span></div>
+          <span class="drive-size">8 TB</span>
+        </div>
+        <div class="drive">
+          <div class="drive-box data">💾<span>Data</span></div>
+          <span class="drive-size">6 TB</span>
+        </div>
+        <div class="drive">
+          <div class="drive-box data">💾<span>Data</span></div>
+          <span class="drive-size">4 TB</span>
+        </div>
+        <div class="drive">
+          <div class="drive-box new">➕<span>Add later</span></div>
+          <span class="drive-size">any size</span>
+        </div>
+      </div>
+      <p style="font-size:13px; color: var(--muted); margin:0;">The parity drive must be equal to or larger than your biggest data drive. Data drives can be any size. Add new drives anytime.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">The "upgrade" rule</div>
+      <p>If you want to add a drive larger than your current parity drive, you need to buy two: one to become the new parity drive, and one to add as data. Or you can repurpose your current parity drive as a data drive once the new parity is in place. Either way — plan on buying in pairs when you scale up.</p>
+    </div>
+
+    <p>My personal strategy: once a year around Black Friday or Amazon Prime Day, I'd buy two matching large drives. One became the new parity. One went on the shelf as a hot spare — ready to swap in immediately if any drive failed. It costs more up front, but the peace of mind is worth it.</p>
+
+    <div class="callout warning">
+      <div class="callout-label">The motherboard limit you'll eventually hit</div>
+      <p>Most consumer motherboards only have 6 SATA ports — meaning 6 drives maximum before you need more. When you get there, the fix is a <strong>PCIe HBA card</strong> (Host Bus Adapter). A used LSI card on eBay runs $40–60 and adds 8 more SATA ports. Unraid treats them exactly like native ports — no reconfiguration needed. I had to do this myself once my array grew past what the motherboard could handle. It's a completely normal step in a growing build, not a problem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 3: LICENSING -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 03</div>
+    <h2>What Unraid Costs</h2>
+    <p>Unraid is not free, but it's not expensive either. As of 2025, they moved to a new tiered model. Here's what it looks like:</p>
+
+    <div class="pricing">
+      <div class="pricing-row header">
+        <div class="pricing-cell">Tier</div>
+        <div class="pricing-cell">What you get</div>
+        <div class="pricing-cell">Cost</div>
+      </div>
+      <div class="pricing-row">
+        <div class="pricing-cell"><strong>Starter</strong></div>
+        <div class="pricing-cell">Up to 6 storage devices</div>
+        <div class="pricing-cell">
+          <span class="price">$49</span>
+          <span class="note">+ $36/yr for updates after year one</span>
+        </div>
+      </div>
+      <div class="pricing-row">
+        <div class="pricing-cell"><strong>Unleashed</strong></div>
+        <div class="pricing-cell">Unlimited storage devices</div>
+        <div class="pricing-cell">
+          <span class="price">$109</span>
+          <span class="note">+ $36/yr for updates after year one</span>
+        </div>
+      </div>
+      <div class="pricing-row">
+        <div class="pricing-cell"><strong>Lifetime</strong></div>
+        <div class="pricing-cell">Unlimited devices + all future updates forever</div>
+        <div class="pricing-cell">
+          <span class="price">$249</span>
+          <span class="note">No annual fee. Ever.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-label">My take</div>
+      <p>I bought the Lifetime license when they still called it "Pro." If you're building something you plan to run for years, Lifetime is the right call — the math works out fast. If you're just testing it, start with Starter. You can upgrade later and pay only the difference.</p>
+    </div>
+
+    <p>One important note: if you don't renew after year one, <strong>you still own the software</strong>. You just stop getting major updates. Security patches continue within your current minor version. It's not a hostage situation.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 4: WHAT IT RUNS -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 04</div>
+    <h2>What You Can Actually Run on This Thing</h2>
+    <p>This is where it gets interesting. Unraid has a built-in app store called <strong>Community Applications</strong> — over 2,000 Docker containers and plugins, all installable with a few clicks. No terminal required for most of them.</p>
+    <p>Here's a taste of what's actually available, organized by what you might want to do:</p>
+
+    <div class="apps-category">
+      <h4>Media</h4>
+      <div class="app-list">
+        <span class="app-chip highlight">Plex</span>
+        <span class="app-chip highlight">Jellyfin</span>
+        <span class="app-chip highlight">Emby</span>
+        <span class="app-chip">Sonarr</span>
+        <span class="app-chip">Radarr</span>
+        <span class="app-chip">Overseerr / Seerr</span>
+        <span class="app-chip">Bazarr</span>
+        <span class="app-chip">Prowlarr</span>
+        <span class="app-chip">Tdarr</span>
+        <span class="app-chip">Plexamp</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Photos</h4>
+      <div class="app-list">
+        <span class="app-chip highlight">Immich</span>
+        <span class="app-chip">Piwigo</span>
+        <span class="app-chip">PhotoPrism</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Backups & File Sharing</h4>
+      <div class="app-list">
+        <span class="app-chip highlight">Nextcloud</span>
+        <span class="app-chip">Duplicati</span>
+        <span class="app-chip">Syncthing</span>
+        <span class="app-chip">Time Machine (SMB)</span>
+        <span class="app-chip">Samba shares</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Networking & Security</h4>
+      <div class="app-list">
+        <span class="app-chip highlight">Pi-hole</span>
+        <span class="app-chip">Nginx Proxy Manager</span>
+        <span class="app-chip">Tailscale</span>
+        <span class="app-chip">WireGuard</span>
+        <span class="app-chip">Authelia</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Home Automation</h4>
+      <div class="app-list">
+        <span class="app-chip highlight">Home Assistant</span>
+        <span class="app-chip">Node-RED</span>
+        <span class="app-chip">MQTT Broker</span>
+        <span class="app-chip">Zigbee2MQTT</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Monitoring & Management</h4>
+      <div class="app-list">
+        <span class="app-chip">Uptime Kuma</span>
+        <span class="app-chip">Dozzle</span>
+        <span class="app-chip">Grafana</span>
+        <span class="app-chip">Portainer</span>
+        <span class="app-chip">Unifi Network</span>
+      </div>
+    </div>
+
+    <div class="apps-category">
+      <h4>Download Clients</h4>
+      <div class="app-list">
+        <span class="app-chip">Deluge</span>
+        <span class="app-chip">qBittorrent</span>
+        <span class="app-chip">SABnzbd</span>
+        <span class="app-chip">NZBGet</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">The point</div>
+      <p>Every one of these runs as an isolated Docker container. They don't conflict. They share the same hardware. You add them one at a time as you need them. Start with Plex. Add Pi-hole when you're curious. Add Home Assistant when you want to go deeper. There's no pressure to do it all at once.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 5: THE PLEX STACK -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 05</div>
+    <h2>My Plex Setup — How the Automation Actually Works</h2>
+    <p>I run a fully automated media stack. Here's how it flows from request to watching:</p>
+
+    <div class="stack">
+      <div class="stack-row">
+        <div class="stack-label">Request</div>
+        <div class="stack-content">
+          <span class="stack-pill active">Overseerr / Seerr</span>
+          <span style="font-size:13px; color: var(--muted);">Anyone on my system can request a movie or show here</span>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Routing</div>
+        <div class="stack-content">
+          <span class="stack-pill active">Sonarr</span>
+          <span style="font-size:13px; color: var(--muted); margin-right:8px;">TV shows</span>
+          <span class="stack-pill active">Radarr (×2)</span>
+          <span style="font-size:13px; color: var(--muted);">Movies — one for 1080p, one for 4K</span>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Download</div>
+        <div class="stack-content">
+          <span class="stack-pill">SABnzbd</span>
+          <span style="font-size:13px; color: var(--muted); margin-right:8px;">Usenet</span>
+          <span class="stack-pill">Deluge</span>
+          <span style="font-size:13px; color: var(--muted);">Torrents</span>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Serve</div>
+        <div class="stack-content">
+          <span class="stack-pill active">Plex</span>
+          <span style="font-size:13px; color: var(--muted);">Library updates automatically. Requester gets notified when it's ready.</span>
+        </div>
+      </div>
+    </div>
+
+    <p>I run two instances of Radarr: the first grabs 1080p immediately, and a second instance syncs from the first and hunts for a 4K version. So most movies end up with both versions available without me doing anything.</p>
+
+    <div class="callout warning">
+      <div class="callout-label">On transcoding</div>
+      <p>Transcoding is when Plex converts a file on the fly because the client can't play the original format. It's CPU-heavy. The best approach: configure your library so files are already in a format all your devices can direct-play — no conversion needed. Tools like Tdarr can handle this pre-conversion automatically. The tradeoff is disk space versus CPU load during playback.</p>
+    </div>
+
+    <p>Two tools I haven't fully explored yet but are worth knowing about: <strong>Tdarr</strong> for automated pre-transcoding your library, and <strong>Wizarr</strong> for managing invitations to your Plex server.</p>
+  </div>
+</section>
+
+<!-- CHAPTER 6: TWO BOXES -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 06</div>
+    <h2>Why I Now Run Two Servers</h2>
+    <p>My setup eventually split into two machines:</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🗼</div>
+        <h3>The Main Tower</h3>
+        <p>Full-size case, many drives, all media storage. Runs Plex, the download stack, Unifi Network controller, and Pi-hole (primary instance).</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>The NUC (Intel Next Unit of Computing)</h3>
+        <p>Small single-drive box. Runs the reverse proxy (Nginx Proxy Manager) for anything that needs to be accessible from outside my home, plus Home Assistant as a VM, and Pi-hole (secondary instance for failover).</p>
+      </div>
+    </div>
+
+    <p>The reason to split them: the NUC handles all inbound internet traffic. If something's exposed to the public internet, it goes through there — not the main box. It also means I can restart or update the big server without killing Home Assistant.</p>
+
+    <div class="callout tip">
+      <div class="callout-label">On Pi-hole</div>
+      <p>Pi-hole acts as a DNS server for your whole home network. Every device routes DNS requests through it, and it blocks ad and tracker domains before they ever load. It's nearly entirely upside — faster browsing, fewer ads everywhere including apps. I run it on both boxes so if one goes down, the other picks up seamlessly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 7: BACKUPS -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 07</div>
+    <h2>What I Actually Back Up (And What I Don't)</h2>
+    <p>My philosophy evolved here. I used to think I needed to back everything up. Now I'm more surgical about it — and I rely entirely on cloud for the things that actually matter.</p>
+
+    <div class="backup-grid">
+      <div class="backup-card yes">
+        <h4>✓ Back this up</h4>
+        <ul>
+          <li>Photos (phone + old SLR library)</li>
+          <li>App & server configurations</li>
+          <li>Important documents</li>
+          <li>Music library (if irreplaceable)</li>
+          <li>Anything you can't recreate</li>
+        </ul>
+      </div>
+      <div class="backup-card no">
+        <h4>↗ Don't bother</h4>
+        <ul>
+          <li>Plex media library</li>
+          <li>Downloaded movies & TV</li>
+          <li>Content you can re-download</li>
+          <li>Anything easily replaceable</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>For actual backup, I use <strong>iDrive</strong> for my computers (reasonably priced for the capacity) and native tools for phones. Cloud is the answer for anything irreplaceable — local backups help with quick recovery, but offsite is what protects you from fire or theft.</p>
+
+    <div class="callout">
+      <div class="callout-label">The honest truth about Plex media</div>
+      <p>I have terabytes of movies and TV shows I've never watched and probably never will. If it all burned tomorrow, I'd rebuild over time. Don't tie yourself in knots backing up content you can re-acquire. Be selective. Have a system for pruning things you'll never touch again.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 8: EVOLUTION -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 08</div>
+    <h2>How This Thing Evolved Over Time</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>Started with salvaged parts</h4>
+        <p>Spare case, recycled work drives, cheap motherboard. The point was to get it running, not to get it perfect.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Added Plex and a download stack</h4>
+        <p>This became the core purpose: a media box for the household. Sonarr, Radarr, and a download client made it self-managing.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Outgrew the original case</h4>
+        <p>Drives everywhere. Eventually bought a full-size tower with proper drive bays. Worth every dollar — the old solution was held together with cable ties.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Hit the motherboard's SATA limit — added an HBA card</h4>
+        <p>Most motherboards only have 6 SATA ports. Once I filled those, I added a PCIe HBA (Host Bus Adapter) card — a used LSI card off eBay for around $40–50 — which added 8 more SATA ports instantly. Unraid sees them all as one seamless array. This is a completely normal part of growing a build and costs almost nothing.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Split off a NUC for networking duties</h4>
+        <p>Home Assistant, reverse proxy, and Pi-hole moved to a small dedicated Intel NUC. Cleaner architecture, more resilient.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Simplified backups, dropped local music</h4>
+        <p>Moved to cloud backup for everything that matters. Stopped hosting music locally — Spotify and Pandora handle 99% of listening now. The library still lives there but rarely gets touched.</p>
+      </div>
+      <div class="timeline-item">
+        <h4>Where it is now</h4>
+        <p>A stable, mostly self-managing system. Light quarterly maintenance. Occasional new Docker container to explore. It runs in the background and mostly just works.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 9: ALTERNATIVES -->
+<section class="chapter">
+  <div class="container">
+    <div class="chapter-label">Chapter 09</div>
+    <h2>Is Unraid the Only Option?</h2>
+    <p>No. It's what I know and what I'd recommend for most people, but it's worth knowing what else exists.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🔵</div>
+        <h3>Proxmox</h3>
+        <p>Free, open-source, hypervisor-first. Great for running VMs. Steeper learning curve. Has come a long way — worth evaluating if you're comfortable with Linux. I tried it years ago and found Unraid friendlier, but that gap may have closed.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🟢</div>
+        <h3>TrueNAS Scale</h3>
+        <p>Free, open-source, ZFS-based. Rock-solid storage. Also supports containers and VMs. More opinionated than Unraid. Great choice if you prefer open-source and don't mind a steeper setup.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🟡</div>
+        <h3>Synology DSM</h3>
+        <p>The easiest. Polished interface, everything just works. Limited by the Synology hardware and proprietary ecosystem. Fine for simple setups; frustrating if you outgrow it.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Why I'd still pick Unraid</div>
+      <p>The mixed-drive flexibility, the Community Applications store, and the UI are genuinely hard to beat for a home setup. The licensing cost is the only real downside — and at $249 lifetime, it's a one-time expense that pays for itself fast.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<section class="footer">
+  <div class="container">
+    <p>// end of journey — your mileage will vary</p>
+  </div>
+</section>
+
+</body>
+</html>
